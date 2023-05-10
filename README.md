@@ -1,3 +1,3 @@
-# mongoDB_Associate_Dev_Exam
+# MongoDB_Associate_Dev_Exam Prep
 
 ### Coming soon
