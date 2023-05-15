@@ -177,8 +177,33 @@ const main = async () => {
 					`❌ ❌  Failed to update items : ${JSON.stringify(pullManyResult)}`,
 			  );
 
+		// DELETE DOCS
+		// Delete one document
+		let docToDelete = { _id: new ObjectId("645b6d5d9fadf3eb43bc944a") };
+		const deleteResult = await bankCollection.deleteOne(docToDelete);
+		deleteResult.deletedCount === 1
+			? console.log(
+					`✅ ✅  Successfully deleted item : ${JSON.stringify(deleteResult)}`,
+			  )
+			: console.log(
+					`❌ ❌  Failed to delete item : ${JSON.stringify(deleteResult)}`,
+			  );
+
+		// Delete many documents
+		let docsToDelete = { balance: { $lt: 1000 } };
+		const deleteManyResult = await bankCollection.deleteMany(docsToDelete);
+		deleteManyResult.deletedCount > 0
+			? console.log(
+					`✅ ✅  Successfully deleted ${
+						deletedManyResult.deletedCount
+					} items: ${JSON.stringify(deleteManyResult)}`,
+			  )
+			: console.log(
+					`❌ ❌  Failed to delete items : ${JSON.stringify(deleteManyResult)}`,
+			  );
+
 		// Query the database
-		let docs = await bankCollection.find({ name: "Saving Account" }).toArray();
+		let docs = await bankCollection.find({}).toArray();
 		docs.forEach((doc) => console.log(doc));
 	} catch (error) {
 		console.error(`❌ ❌  Error in MongoDB 💪 💪 : ${dbName}`, error);
