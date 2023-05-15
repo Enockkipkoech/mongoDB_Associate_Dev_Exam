@@ -1,7 +1,7 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { uri } from "./atlas_uri.js";
 
-console.log(uri);
+// console.log(uri);
 
 //Initiate connection to MongoDB
 const client = new MongoClient(uri, {
@@ -27,7 +27,7 @@ const connectToMongoDB = async () => {
 // Other functions
 const listDBs = async (client) => {
 	const databasesList = await client.db().admin().listDatabases();
-	console.log("Databases_Info:", databasesList.databases);
+	// console.log("Databases_Info:", databasesList.databases);
 	databasesList.databases.forEach((db) => console.log(` - ${db.name}`));
 };
 
@@ -82,10 +82,10 @@ const main = async () => {
 
 		// Insert one document
 		const insertResultOne = await bankCollection.insertOne(sampleAccount);
-
 		console.log(
 			`✅ ✅  Successfully inserted item : ${JSON.stringify(insertResultOne)}`,
 		);
+
 		// Insert many documents
 		const insertResultMany = await bankCollection.insertMany(sampleAccounts);
 		console.log(
@@ -93,6 +93,93 @@ const main = async () => {
 				insertResultMany,
 			)}`,
 		);
+
+		// Query the database
+
+		const docFilter = { balance: { $gt: 1000 } };
+		const docToFind = { _id: new ObjectId("645b6d5d9fadf3eb43bc944a") };
+		//find()
+		const queryResult = await bankCollection.find(docFilter).toArray();
+		queryResult.forEach((doc) => {
+			console.log(doc);
+			return doc;
+		});
+		console.log(
+			`✅ ✅  Successfully queried items : ${JSON.stringify(queryResult)}`,
+		);
+
+		// DOC COUNT
+		const docCount = await bankCollection.countDocuments(docFilter);
+		console.log(`✅ ✅  Found : ${docCount} document(s)`);
+
+		// findOne()
+		const queryResultOne = await bankCollection.findOne(docToFind);
+		console.log(
+			`✅ ✅  Successfully found queried item : ${JSON.stringify(
+				queryResultOne,
+			)}`,
+		);
+
+		//UPDATE DOCS
+		// Update one document
+		let docToUpdate = { _id: new ObjectId("645b6d5d9fadf3eb43bc944a") };
+		let updateDoc = { $inc: { balance: 5000 } }; // update operator
+		const updateResult = await bankCollection.updateOne(docToUpdate, updateDoc);
+		updateResult.modifiedCount === 1
+			? console.log(
+					`✅ ✅  Successfully updated item : ${JSON.stringify(updateResult)}`,
+			  )
+			: console.log(
+					`❌ ❌  Failed to update item : ${JSON.stringify(updateResult)}`,
+			  );
+
+		// Update many documents
+		let docsToUpdate = { name: "Saving Account" };
+		//$push
+		let updateDocs = { $push: { transfer_complete: "TR-SAV4007" } }; // update operator - push to array
+		const updateManyResult = await bankCollection.updateMany(
+			docsToUpdate,
+			updateDocs,
+		);
+		updateManyResult.modifiedCount > 0
+			? console.log(
+					`✅ ✅  Successfully updated items : ${JSON.stringify(
+						updateManyResult,
+					)}`,
+			  )
+			: console.log(
+					`❌ ❌  Failed to update items : ${JSON.stringify(updateManyResult)}`,
+			  );
+
+		//$pop
+		let popDocs = { $pop: { transfer_complete: -1 } }; // update operator - pop from array
+		const popManyResult = await bankCollection.updateMany({}, popDocs);
+		popManyResult.modifiedCount > 0
+			? console.log(
+					`✅ ✅  Successfully updated items : ${JSON.stringify(
+						popManyResult,
+					)}`,
+			  )
+			: console.log(
+					`❌ ❌  Failed to update items : ${JSON.stringify(popManyResult)}`,
+			  );
+
+		// $pull
+		let pullDocs = { $pull: { transfer_complete: "TR-SAV4007" } }; // update operator - pull from array
+		const pullManyResult = await bankCollection.updateMany({}, pullDocs);
+		pullManyResult.modifiedCount > 0
+			? console.log(
+					`✅ ✅  Successfully updated items : ${JSON.stringify(
+						pullManyResult,
+					)}`,
+			  )
+			: console.log(
+					`❌ ❌  Failed to update items : ${JSON.stringify(pullManyResult)}`,
+			  );
+
+		// Query the database
+		let docs = await bankCollection.find({ name: "Saving Account" }).toArray();
+		docs.forEach((doc) => console.log(doc));
 	} catch (error) {
 		console.error(`❌ ❌  Error in MongoDB 💪 💪 : ${dbName}`, error);
 	} finally {
