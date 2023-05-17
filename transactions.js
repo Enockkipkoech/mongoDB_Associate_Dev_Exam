@@ -1,17 +1,19 @@
-const { MongoClient } = require("mongodb");
-require("dotenv").config();
+import { MongoClient } from "mongodb";
+import "dotenv/config";
+import { uri } from "./atlas_uri.js";
 
-const uri = process.env.MONGODB_URI;
+// const uri = process.env.MONGODB_URI;
+console.log(uri);
 const client = new MongoClient(uri);
 
 // Collections
-const accounts = client.db("bank").collection("accounts");
-const transfers = client.db("bank").collection("transfers");
+const accounts = client.db("NodesLearning").collection("accounts");
+const transfers = client.db("NodesLearning").collection("transfers");
 
 // Account information
-let account_id_sender = "MDB574189300";
-let account_id_receiver = "MDB343652528";
-let transaction_amount = 100;
+let account_id_sender = 371138;
+let account_id_receiver = 668949;
+let transaction_amount = 9;
 
 // Start the client session
 const session = client.startSession();
@@ -29,7 +31,7 @@ const main = async () => {
 				{ session },
 			);
 			console.log(
-				`${updateSenderResults.matchedCount} document(s) matched the filter, updated ${updateSenderResults.modifiedCount} document(s) for the sender account.`,
+				`${updateSenderResults.matchedCount} document(s) matched the filter, updated ${updateSenderResults.modifiedCount} document(s) for the sender account ${account_id_sender}.`,
 			);
 
 			// Step 2: Update the account receiver balance
@@ -39,13 +41,13 @@ const main = async () => {
 				{ session },
 			);
 			console.log(
-				`${updateReceiverResults.matchedCount} document(s) matched the filter, updated ${updateReceiverResults.modifiedCount} document(s) for the receiver account.`,
+				`${updateReceiverResults.matchedCount} document(s) matched the filter, updated ${updateReceiverResults.modifiedCount} document(s) for the receiver account ${account_id_receiver}.`,
 			);
 
 			// Step 3: Insert the transfer document
 			const transfer = {
 				transfer_id: "TR21872187",
-				amount: 100,
+				amount: transaction_amount,
 				from_account: account_id_sender,
 				to_account: account_id_receiver,
 			};
@@ -78,6 +80,7 @@ const main = async () => {
 		});
 
 		console.log("Committing transaction ...");
+
 		// If the callback for withTransaction returns successfully without throwing an error, the transaction will be committed
 		if (transactionResults) {
 			console.log("The reservation was successfully created.");
